@@ -136,6 +136,23 @@ class Hello extends Module {
 - **模块间传递数据位宽参数**
 
 错误代码1：
+
+在此处，signal被定义为Int类型
+```
+class ResIO(val sigsize : Int) extends Bundle{
+    val signal = Input(Int(sigsize.W))
+    val res = Output(Bool())
+```
+报错
+```
+[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:25: Int.type does not take parameters
+[error]   val signal = Input(Int(sigsize.W))
+[error]                         ^
+```
+
+错误代码2：
+
+在此处，signal定义的位宽大小参数sigsize数据类型为UInt
 ```
 class ResIO(val sigsize : UInt) extends Bundle{
     val signal = Input(UInt(sigsize.W))
@@ -146,17 +163,6 @@ class ResIO(val sigsize : UInt) extends Bundle{
 [error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:35: value W is not a member of chisel3.UInt
 [error]   val signal = Input(UInt(sigsize.W))
 [error]                                   ^
-```
-错误代码2：
-```
-[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:25: Int.type does not take parameters
-[error]   val signal = Input(Int(sigsize.W))
-[error]                         ^
-```
-报错
-```
-[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:25: Int.type does not take parameters
-[error]   val signal = Input(Int(sigsize.W))
 ```
 注意，如果数据类型是Int类型，Int类型不具有参数
 
