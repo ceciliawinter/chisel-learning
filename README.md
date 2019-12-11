@@ -134,6 +134,7 @@ class Hello extends Module {
 大概理解为，此时对于a的值的修改是可以保持的，对于所有可以修改reg类型数据的条件均不满足时，a的值与上一时钟周期保持一致。
 
 - **模块间传递数据位宽参数**
+
 错误代码1：
 ```
 class ResIO(val sigsize : Int) extends Bundle{
@@ -158,3 +159,11 @@ class ResIO(val sigsize : Int) extends Bundle{
 ```
 注意，如果数据类型是Int类型，Int类型不具有参数
 数据定义为UInt类型，可以通过参数来定义数据的大小，该参数必须为UInt类型，不可为Int类型
+
+正确示例：
+```
+class ResIO(val sigsize : Int) extends Bundle{
+   val signal = Input(UInt(sigsize.W))
+   val res = Output(Bool())
+}
+```
