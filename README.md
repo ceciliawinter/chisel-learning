@@ -1,10 +1,20 @@
 # chisel-learning
+
+- [chisel-learning](https://github.com/ceciliawinter/chisel-learning)
+  * [**报错解决**](#--------)
+    + [**switch报错**](#--switch----)
+    + [**数据类型错误**](#----------)
+    + [**模块间传递数据位宽参数**](#---------------)
+  * [**学习问题**](#------)
+    + [**溢出**](#------)
+    + [**区分reg与wire类型/对reg类型是否赋初值的区分**](#----reg-wire----reg------------)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 记录chisel学习过程中遇到的问题
-- **溢出**
 
-两个操作数位数不等时，结果位数与位数高的操作数相同，会产生溢出的问题加减操作可以改为+% -%，会进行位扩展
-
-- **switch报错**
+## **报错解决**
+### **switch报错**
 
 部分报错内容：
 ```
@@ -19,7 +29,7 @@
 ```
 import chisel3.util._
 ```
-- **数据类型错误**
+### **数据类型错误**
 
 代码：
 ```
@@ -40,7 +50,56 @@ val addr = Wire(UInt(4.W))
 val addrWidth = 4
 val addr = Wire(UInt(addrWidth.W)) 
 ```
-- **区分reg与wire类型/对reg类型是否赋初值的区分**
+
+### **模块间传递数据位宽参数**
+
+错误代码1：
+
+在此处，signal被定义为Int类型
+```
+class ResIO(val sigsize : Int) extends Bundle{
+    val signal = Input(Int(sigsize.W))
+    val res = Output(Bool())
+```
+报错
+```
+[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:25: Int.type does not take parameters
+[error]   val signal = Input(Int(sigsize.W))
+[error]                         ^
+```
+
+错误代码2：
+
+在此处，signal定义的位宽大小参数sigsize数据类型为UInt
+```
+class ResIO(val sigsize : UInt) extends Bundle{
+    val signal = Input(UInt(sigsize.W))
+    val res = Output(Bool())
+```
+报错
+```
+[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:35: value W is not a member of chisel3.UInt
+[error]   val signal = Input(UInt(sigsize.W))
+[error]                                   ^
+```
+注意，如果数据类型是Int类型，Int类型不具有参数
+
+数据定义为UInt类型，可以通过参数来定义数据的大小，该参数必须为Int类型，不可为UInt类型
+
+正确示例：
+```
+class ResIO(val sigsize : Int) extends Bundle{
+   val signal = Input(UInt(sigsize.W))
+   val res = Output(Bool())
+}
+```
+## **学习问题**
+
+### **溢出**
+
+两个操作数位数不等时，结果位数与位数高的操作数相同，会产生溢出的问题加减操作可以改为+% -%，会进行位扩展
+
+### **区分reg与wire类型/对reg类型是否赋初值的区分**
 
 在verilog里面我们修改一个值的时候是一直写出来的，比如
 ```verilog
@@ -132,46 +191,3 @@ class Hello extends Module {
   end
 ```
 大概理解为，此时对于a的值的修改是可以保持的，对于所有可以修改reg类型数据的条件均不满足时，a的值与上一时钟周期保持一致。
-
-- **模块间传递数据位宽参数**
-
-错误代码1：
-
-在此处，signal被定义为Int类型
-```
-class ResIO(val sigsize : Int) extends Bundle{
-    val signal = Input(Int(sigsize.W))
-    val res = Output(Bool())
-```
-报错
-```
-[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:25: Int.type does not take parameters
-[error]   val signal = Input(Int(sigsize.W))
-[error]                         ^
-```
-
-错误代码2：
-
-在此处，signal定义的位宽大小参数sigsize数据类型为UInt
-```
-class ResIO(val sigsize : UInt) extends Bundle{
-    val signal = Input(UInt(sigsize.W))
-    val res = Output(Bool())
-```
-报错
-```
-[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:35: value W is not a member of chisel3.UInt
-[error]   val signal = Input(UInt(sigsize.W))
-[error]                                   ^
-```
-注意，如果数据类型是Int类型，Int类型不具有参数
-
-数据定义为UInt类型，可以通过参数来定义数据的大小，该参数必须为Int类型，不可为UInt类型
-
-正确示例：
-```
-class ResIO(val sigsize : Int) extends Bundle{
-   val signal = Input(UInt(sigsize.W))
-   val res = Output(Bool())
-}
-```
