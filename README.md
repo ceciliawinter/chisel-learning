@@ -137,20 +137,21 @@ class Hello extends Module {
 
 错误代码1：
 ```
-class ResIO(val sigsize : Int) extends Bundle{
+class ResIO(val sigsize : UInt) extends Bundle{
     val signal = Input(UInt(sigsize.W))
     val res = Output(Bool())
 ```
 报错
 ```
-[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:35: value Width is not a member of chisel3.UInt
-[error]   val signal = Input(UInt(sigsize.Width))
+[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:35: value W is not a member of chisel3.UInt
+[error]   val signal = Input(UInt(sigsize.W))
+[error]                                   ^
 ```
 错误代码2：
 ```
-class ResIO(val sigsize : Int) extends Bundle{
-    val signal = Input(Int(sigsize.W))
-    val res = Output(Bool())
+[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:25: Int.type does not take parameters
+[error]   val signal = Input(Int(sigsize.W))
+[error]                         ^
 ```
 报错
 ```
@@ -158,7 +159,8 @@ class ResIO(val sigsize : Int) extends Bundle{
 [error]   val signal = Input(Int(sigsize.W))
 ```
 注意，如果数据类型是Int类型，Int类型不具有参数
-数据定义为UInt类型，可以通过参数来定义数据的大小，该参数必须为UInt类型，不可为Int类型
+
+数据定义为UInt类型，可以通过参数来定义数据的大小，该参数必须为Int类型，不可为UInt类型
 
 正确示例：
 ```
