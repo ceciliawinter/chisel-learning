@@ -1,20 +1,21 @@
 # chisel-learning
 
-- [chisel-learning](https://github.com/ceciliawinter/chisel-learning)
-  * [**报错解决**](#--------)
-    + [**switch报错**](#--switch----)
-    + [**数据类型错误**](#----------)
-    + [**模块间传递数据位宽参数**](#---------------)
-  * [**学习问题**](#------)
-    + [**溢出**](#------)
-    + [**区分reg与wire类型/对reg类型是否赋初值的区分**](#----reg-wire----reg------------)
+- [chisel-learning](#chisel-learning)
+  * [报错解决](#报错解决)
+    + [switch报错](#switch报错)
+    + [数据类型错误](#数据类型错误)
+    + [模块间传递数据位宽参数](#模块间传递数据位宽参数)
+  * [学习问题](#学习问题)
+    + [溢出](#溢出)
+    + [区分reg与wire类型or对reg类型是否赋初值的区分](#区分reg与wire类型or对reg类型是否赋初值的区分)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
+
 记录chisel学习过程中遇到的问题
 
-## **报错解决**
-### **switch报错**
+## 报错解决
+### switch报错
 
 部分报错内容：
 ```
@@ -29,7 +30,7 @@
 ```
 import chisel3.util._
 ```
-### **数据类型错误**
+### 数据类型错误
 
 代码：
 ```
@@ -51,7 +52,7 @@ val addrWidth = 4
 val addr = Wire(UInt(addrWidth.W)) 
 ```
 
-### **模块间传递数据位宽参数**
+### 模块间传递数据位宽参数
 
 错误代码1：
 
@@ -93,13 +94,13 @@ class ResIO(val sigsize : Int) extends Bundle{
    val res = Output(Bool())
 }
 ```
-## **学习问题**
+## 学习问题
 
-### **溢出**
+### 溢出
 
 两个操作数位数不等时，结果位数与位数高的操作数相同，会产生溢出的问题加减操作可以改为+% -%，会进行位扩展
 
-### **区分reg与wire类型/对reg类型是否赋初值的区分**
+### 区分reg与wire类型or对reg类型是否赋初值的区分
 
 在verilog里面我们修改一个值的时候是一直写出来的，比如
 ```verilog
