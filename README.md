@@ -6,6 +6,8 @@
     + [数据类型错误](#数据类型错误)
     + [模块间传递数据位宽参数](#模块间传递数据位宽参数)
     + [Bool类型赋值](#bool类型赋值)
+    + [无隐式时钟域复位信号报错](#无隐式时钟域复位信号报错)
+    + [在when中对io端口数据进行修改](#在when中对io端口数据进行修改)
   * [学习问题](#学习问题)
     + [溢出](#溢出)
     + [区分reg与wire类型or对reg类型是否赋初值的区分](#区分reg与wire类型or对reg类型是否赋初值的区分)
@@ -121,6 +123,56 @@ Boolean为scala数据类型，在chisel中所需要的是Bool类型
 ```
 io.res := true.B
 ```
+
+### 无隐式时钟域复位信号报错
+
+报错信息
+```
+[error] (run-main-0) chisel3.internal.ChiselException: Error: No implicit clock and reset.
+[error] chisel3.internal.ChiselException: Error: No implicit clock and reset.
+```
+https://groups.google.com/forum/#!topic/chisel-users/ixalgSaK0Gg
+
+之前使用BlackBox用verilog代码实现部分功能，使用chisel语言重新编写时，未改变为Module,故产生不存在隐式时钟域reset信号报错
+
+### 在when中对io端口数据进行修改
+
+代码：
+```
+class ResIO(val sigsize : Int) extends Bundle{
+  val signal = Input(UInt(sigsize.W))
+  val res = Output(Bool())
+}
+
+class Response(val sigsize : Int) extends Module{
+  val io = IO(new ResIO(sigsize))
+  val signal_pre = RegInit(0.U(sigsize.W))
+  signal_pre := RegNext(io.signal)
+  val res = Reg(Bool())
+  when(signal_pre =/= io.signal){
+      io.res := true.B
+  }
+  io.res := false.B
+}
+```
+报错信息：
+```
+[error] (run-main-0) firrtl.FIRRTLException: Internal Error! Please file an issue at https://github.com/ucb-bar/firrtl/issues
+[error] firrtl.FIRRTLException: Internal Error! Please file an issue at https://github.com/ucb-bar/firrtl/issues
+[error]         at firrtl.Utils$.error(Utils.scala:396)
+......
+```
+提示报错为内部错误，尝试修改写法
+```
+  val res = Reg(Bool())
+  when(signal_pre =/= io.signal){
+      res := true.B
+  }
+  res := false.B
+  io.res := res
+}
+```
+测试发现在when语句内部修改OutPut端口值，即会出现报错，猜测chisel中不可以使用此语法 ***TODO待查寻是否语法规则如此***
 
 ## 学习问题
 
