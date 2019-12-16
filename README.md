@@ -5,6 +5,7 @@
     + [switch报错](#switch报错)
     + [数据类型错误](#数据类型错误)
     + [模块间传递数据位宽参数](#模块间传递数据位宽参数)
+    + [Bool类型赋值](#bool类型赋值)
   * [学习问题](#学习问题)
     + [溢出](#溢出)
     + [区分reg与wire类型or对reg类型是否赋初值的区分](#区分reg与wire类型or对reg类型是否赋初值的区分)
@@ -19,10 +20,10 @@
 
 部分报错内容：
 ```
-[error] /home/cecilia/risc5/chisel-examples/hello-world/src/main/scala/Hello.scala:28:3: not found: value switch
+[error] Hello.scala:28:3: not found: value switch
 [error]   switch(io.num){
 [error]   ^
-[error] /home/cecilia/risc5/chisel-examples/hello-world/src/main/scala/Hello.scala:30:5: not found: value is
+[error] Hello.scala:30:5: not found: value is
 [error]     is("b0000".U) {io.seg := "b11000000".U}
 [error]     ^
 ```
@@ -64,7 +65,7 @@ class ResIO(val sigsize : Int) extends Bundle{
 ```
 报错
 ```
-[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:25: Int.type does not take parameters
+[error] Template.scala:18:25: Int.type does not take parameters
 [error]   val signal = Input(Int(sigsize.W))
 [error]                         ^
 ```
@@ -79,7 +80,7 @@ class ResIO(val sigsize : UInt) extends Bundle{
 ```
 报错
 ```
-[error] /home/cecilia/risc5/bfspipline/easyFSM/src/main/scala/Template.scala:18:35: value W is not a member of chisel3.UInt
+[error] Template.scala:18:35: value W is not a member of chisel3.UInt
 [error]   val signal = Input(UInt(sigsize.W))
 [error]                                   ^
 ```
@@ -94,6 +95,33 @@ class ResIO(val sigsize : Int) extends Bundle{
    val res = Output(Bool())
 }
 ```
+
+### Bool类型赋值
+
+错误代码：
+```
+//io.res定义部分
+val res = Output(Bool())
+//赋值部分
+io.res := true
+```
+报错
+```
+[error]  Template.scala:27:15: type mismatch;
+[error]  found   : Boolean(true)
+[error]  required: chisel3.core.Data
+[error]     io.res := true
+[error]               ^
+```
+stackoverflow上查找到解决方案：https://stackoverflow.com/questions/41658288/comparing-two-bits-type-values-in-chisel-3
+
+Boolean为scala数据类型，在chisel中所需要的是Bool类型
+
+修改代码，将类型转化为Bool
+```
+io.res := true.B
+```
+
 ## 学习问题
 
 ### 溢出
@@ -192,3 +220,5 @@ class Hello extends Module {
   end
 ```
 大概理解为，此时对于a的值的修改是可以保持的，对于所有可以修改reg类型数据的条件均不满足时，a的值与上一时钟周期保持一致。
+
+
