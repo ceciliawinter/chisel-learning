@@ -10,6 +10,7 @@
     + [在when中对io端口数据进行修改](#在when中对io端口数据进行修改)
   * [学习问题](#学习问题)
     + [溢出](#溢出)
+    + [修改UInt某一位](#修改uint某一位)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -169,15 +170,28 @@ class Response(val sigsize : Int) extends Module{
   }
   res := false.B
   io.res := res
-}
 ```
 测试发现在when语句内部修改OutPut端口值，即会出现报错，猜测chisel中不可以使用此语法 ***TODO待查寻是否语法规则如此***
 
+## 学习问题
 
 ### 溢出
 
 两个操作数位数不等时，结果位数与位数高的操作数相同，会产生溢出的问题加减操作可以改为+% -%，会进行位扩展
 
+### 修改UInt某一位
 
+[chisel3 wiki](https://github.com/freechipsproject/chisel3/wiki/Cookbook#how-do-i-do-subword-assignment-assign-to-some-bits-in-a-uint)
+
+chisel3不支持修改子词，可以使用Bundles和Vecs来表达
+
+将UInt转为Vec
+```
+val data = RegInit(0.U(32.W))
+val data_bitmap = VecInit(data.asBools))
+data_bitmap(0) := true.B
+data := data_bitmap.asUInt
+```
+ps 目前推荐使用asBools代替chisel3 wiki中提到的toBools
 
 
