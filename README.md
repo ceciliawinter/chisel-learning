@@ -8,6 +8,7 @@
     + [Bool类型赋值](#bool类型赋值)
     + [无隐式时钟域复位信号报错](#无隐式时钟域复位信号报错)
     + [在when中对io端口数据进行修改](#在when中对io端口数据进行修改)
+    + [scala版本导致的错误](#scala版本导致的错误)
   * [学习问题](#学习问题)
     + [溢出](#溢出)
     + [修改UInt某一位](#修改uint某一位)
@@ -172,6 +173,18 @@ class Response(val sigsize : Int) extends Module{
   io.res := res
 ```
 测试发现在when语句内部修改OutPut端口值，即会出现报错，猜测chisel中不可以使用此语法 ***TODO待查寻是否语法规则如此***
+
+### scala版本导致的错误
+
+在尝试使用scala命令行时，使用scala 2.11.x试，命令行仅显示输出，不显示输入，因此将scala版本更换为2.12.x
+
+https://stackoverflow.com/questions/49788781/ubuntu-scala-repl-commands-not-typed-on-console
+
+更换了scala版本后，原本正常运行的chisel3程序不能正常运行，产生报错 *** is not a member of chisel3.Bundle
+
+https://stackoverflow.com/questions/58365679/value-is-not-a-member-of-chisel3-bundle
+
+scala可以安装多个版本，使用scala2.12.x的命令行，在chisel工程中，build.sbt中选择2.11.x即可
 
 ## 学习问题
 
