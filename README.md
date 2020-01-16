@@ -12,6 +12,8 @@
   * [学习问题](#学习问题)
     + [溢出](#溢出)
     + [修改UInt某一位](#修改uint某一位)
+    + [状态无法保持](#状态无法保持)
+    
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -207,4 +209,25 @@ data := data_bitmap.asUInt
 ```
 ps 目前推荐使用asBools代替chisel3 wiki中提到的toBools
 
+### 状态无法保持
 
+代码中包含数据visited_map,visited_map_bitmap
+bitmap用于对每一位的修改
+
+```
+val visited_map = RegInit(0.U(32.W))
+val visited_map_bitmap = VecInit(visited_map.asBools)
+```
+
+修改前
+```
+dinbReg := visited_map_bitmap.asUInt
+```
+将数据连接到bram上时，直接将visited_map_bitmap.asUInt连接到bram的dinb接口，visited_map_bitmap值在下一次状态跳变时没有保持，修改为:
+
+```
+visited_map := visited_map_bitmap.asUInt
+dinbReg := visited_map
+```
+
+查看波形图，visited_map_bitmap状态可以持续保持
