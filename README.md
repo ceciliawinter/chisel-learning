@@ -13,6 +13,8 @@
     + [溢出](#溢出)
     + [修改UInt某一位](#修改uint某一位)
     + [状态无法保持](#状态无法保持)
+    + [端口错误优化](#端口错误优化)
+    + [memory载入数据](#memory载入数据)
     
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
@@ -231,3 +233,31 @@ dinbReg := visited_map
 ```
 
 查看波形图，visited_map_bitmap状态可以持续保持
+
+### 端口错误优化
+
+在生成verilog代码时，单独综合某一模块，所有的端口与chisel代码保持一致，但是在综合Top模块时，调用的某些模块端口被优化，优化的部分内容缺失后无法实现设置的功能，可以取消相关优化
+[chisel dontTouch](https://www.chisel-lang.org/api/latest/chisel3/dontTouch$.html)
+
+```
+import chisel3.dontTouch
+dontTouch(io)
+val a = dontTouch(...)
+```
+
+### memory载入数据
+
+需要初始化memory中的数据可以使用loadMemoryFromFile来实现
+[chisel loadMemoryFromFile](https://www.chisel-lang.org/api/latest/chisel3/util/experimental/loadMemoryFromFile$.html)
+```
+    val ram = Mem(65535, UInt(64.W))
+    loadMemoryFromFile(ram, "./mem.txt")
+```
+
+可以使用2进制或格式进制数据，注意文件格式如下：
+
+```
+0
+1
+2
+```
