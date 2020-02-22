@@ -15,6 +15,7 @@
     + [状态无法保持](#状态无法保持)
     + [端口错误优化](#端口错误优化)
     + [memory载入数据](#memory载入数据)
+    + [使用Analog](#使用analog)
     
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
@@ -260,4 +261,15 @@ val a = dontTouch(...)
 0
 1
 2
+```
+
+### 使用Analog
+
+使用Analog声明位宽，以实现在blackbox中使用verilog的inout端口
+
+需要chisel版本在3.1以上且引用import chisel3.experimental._
+```
+import chisel3.experimental._
+···
+val ddr2_dq = Analog(8.W)
 ```
