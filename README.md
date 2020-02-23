@@ -9,6 +9,7 @@
     + [无隐式时钟域复位信号报错](#无隐式时钟域复位信号报错)
     + [在when中对io端口数据进行修改](#在when中对io端口数据进行修改)
     + [scala版本导致的错误](#scala版本导致的错误)
+    + [reset类型错误](#reset类型错误)
   * [学习问题](#学习问题)
     + [溢出](#溢出)
     + [修改UInt某一位](#修改uint某一位)
@@ -16,7 +17,6 @@
     + [端口错误优化](#端口错误优化)
     + [memory载入数据](#memory载入数据)
     + [使用Analog](#使用analog)
-    
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -190,6 +190,34 @@ https://stackoverflow.com/questions/49788781/ubuntu-scala-repl-commands-not-type
 https://stackoverflow.com/questions/58365679/value-is-not-a-member-of-chisel3-bundle
 
 scala可以安装多个版本，使用scala2.12.x的命令行，在chisel工程中，build.sbt中选择2.11.x即可
+
+### reset类型错误
+
+报错代码：
+```
+dram.io.clk_and_rst.sys_rst := reset
+```
+dram.io.clk_and_rst.sys_rs定义：
+```
+val sys_rst = Input(Bool())
+```
+报错信息
+```
+[error] chisel3.internal.ChiselException: Connection between sink (Bool(IO clk_and_rst_sys_rst in my_mig_ddr2)) and source (Reset(IO in unelaborated dramtest)) failed @: Sink (Bool(IO clk_and_rst_sys_rst in my_mig_ddr2)) and Source (Reset(IO in unelaborated dramtest)) have different types.
+[error]         ...
+```
+再将reset信号接出时，对应的类型应为Reset(),但是用withClockAndReset多时钟域时，对应的reset信号的数据类型应为Bool，修改后代码：
+```
+val sys_rst = Input(Reset())
+val ui_clk_sync_rst = Output(Bool())
+...
+
+dram.io.clk_and_rst.sys_rst := reset
+withClockAndReset(dram.io.clk_and_rst.ui_clk, dram.io.clk_and_rst.ui_clk_sync_rst)
+...
+```
+
+
 
 ## 学习问题
 
