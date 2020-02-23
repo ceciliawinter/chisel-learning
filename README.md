@@ -221,11 +221,8 @@ withClockAndReset(dram.io.clk_and_rst.ui_clk, dram.io.clk_and_rst.ui_clk_sync_rs
 ### 引用的包包含同名字段
 
 在使用withClockAndReset时，根据查阅到的资料为
-```
-注意，在编写代码时不能写成“import chisel3.core._”，这会扰乱“import chisel3._”的导入内容。
-正确做法是用“import chisel3.experimental._”导入experimental对象，
-它里面用同名字段引用了单例对象chisel3.core.withClockAndReset，这样就不需要再导入core包。
-```
+> 注意，在编写代码时不能写成“import chisel3.core._”，这会扰乱“import chisel3._”的导入内容。正确做法是用“import chisel3.experimental._”导入experimental对象，它里面用同名字段引用了单例对象chisel3.core.withClockAndReset，这样就不需要再导入core包。
+
 但是实际使用中依旧会出现报错
 ```
 [error] reference to withClockAndReset is ambiguous;
