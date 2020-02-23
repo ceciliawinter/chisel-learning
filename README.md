@@ -10,6 +10,7 @@
     + [在when中对io端口数据进行修改](#在when中对io端口数据进行修改)
     + [scala版本导致的错误](#scala版本导致的错误)
     + [reset类型错误](#reset类型错误)
+    + [引用的包包含同名字段](#引用的包包含同名字段)
   * [学习问题](#学习问题)
     + [溢出](#溢出)
     + [修改UInt某一位](#修改uint某一位)
@@ -217,7 +218,25 @@ withClockAndReset(dram.io.clk_and_rst.ui_clk, dram.io.clk_and_rst.ui_clk_sync_rs
 ...
 ```
 
+### 引用的包包含同名字段
 
+在使用withClockAndReset时，根据查阅到的资料为
+```
+注意，在编写代码时不能写成“import chisel3.core._”，这会扰乱“import chisel3._”的导入内容。
+正确做法是用“import chisel3.experimental._”导入experimental对象，
+它里面用同名字段引用了单例对象chisel3.core.withClockAndReset，这样就不需要再导入core包。
+```
+但是实际使用中依旧会出现报错
+```
+[error] reference to withClockAndReset is ambiguous;
+[error] it is imported twice in the same scope by
+[error] import chisel3.experimental._
+[error] and import chisel3._
+[error]     withClockAndReset(dram.io.ui_clk, dram.io.ui_clk_sync_rst) {
+```
+TODO解决方案
+
+因为端口连接需要attach，必须引用chisel3.experimental._ ，尝试在使用attach前再引用chisel3.experimental._ , 不在文件开头引用，可行
 
 ## 学习问题
 
