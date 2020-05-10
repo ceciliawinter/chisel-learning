@@ -11,6 +11,7 @@
     + [scala版本导致的错误](#scala版本导致的错误)
     + [reset类型错误](#reset类型错误)
     + [引用的包包含同名字段](#引用的包包含同名字段)
+    + [io中使用数组](#io中使用数组)
   * [学习问题](#学习问题)
     + [溢出](#溢出)
     + [修改UInt某一位](#修改uint某一位)
@@ -18,7 +19,7 @@
     + [端口错误优化](#端口错误优化)
     + [memory载入数据](#memory载入数据)
     + [使用Analog](#使用analog)
-
+    
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
 
@@ -234,6 +235,36 @@ withClockAndReset(dram.io.clk_and_rst.ui_clk, dram.io.clk_and_rst.ui_clk_sync_rs
 TODO解决方案
 
 因为端口连接需要attach，必须引用chisel3.experimental._ ，尝试在使用attach前再引用chisel3.experimental._ , 不在文件开头引用，可行
+
+### io中使用数组
+
+报错代码：
+```
+ val io = IO(new Bundle{
+  val p1_finish = Array.fill (2) ( Input(Bool()))
+ })
+ val p1_finish_state = Wire(Bool())
+ p1_finish_state := io.p1_finish(0) && io.p1_finish(1)
+```
+
+报错信息：
+```
+[error] (run-main-0) chisel3.core.Binding$ExpectedHardwareException: bits operated on 'chisel3.core.Bool@22' must be hardware, not a bare Chisel type. Perhaps you forgot to wrap it in Wire(_) or IO(_)?
+```
+
+修改端口定义方式，使用Chisel的特性Vec来定义数组，不使用Scala类型
+
+https://www.cnblogs.com/JamesDYX/p/10082385.html
+
+```
+ val io = IO(new Bundle{
+  val p1_finish = Input(Vec(2, Bool()))
+ })
+ val p1_finish_state = Wire(Bool())
+ p1_finish_state := io.p1_finish(0) && io.p1_finish(1)
+```
+
+
 
 ## 学习问题
 
