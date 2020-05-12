@@ -19,6 +19,7 @@
     + [端口错误优化](#端口错误优化)
     + [memory载入数据](#memory载入数据)
     + [使用Analog](#使用analog)
+    + [模块名称参数化](#模块名称参数化)
     
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -348,3 +349,88 @@ import chisel3.experimental._
 ···
 val ddr2_dq = Analog(8.W)
 ```
+
+### 模块名称参数化
+
+
+Chisel2内有setName功能，但是Chisel3没有，使用desiredName来实现
+[chisel3 wiki](https://github.com/freechipsproject/chisel3/wiki/Cookbook#how-can-i-dynamically-setparametrize-the-name-of-a-module)
+
+在chisel3 wiki中讲解了使用desiredName来参数化模块名称，但是该名称仍是固定的
+
+尝试使用与setName类似的形式实现，用“+”连接参数
+
+实现代码内部有两个kernel，两个kernel需要使用个不同的bram ip核（即blk_mem_gen模块）
+
+在blk_mem_gen模块内部使用desiredName使不同的kernel内部的bram具有不同的名称
+
+主要传进去的参数num为Int类型，不要使用UInt
+```
+class blk_mem_gen_IO(implicit val conf : Configuration) extends Bundle{
+	val addra = Input(UInt(conf.Addr_width.W))
+	val dina = Input(UInt(conf.Data_width.W))
+	val douta = Output(UInt(conf.Data_width.W))
+}
+
+class blk_mem_gen(val num : Int)(implicit val conf : Configuration) extends BlackBox{
+	val io = IO(new blk_mem_gen_IO)
+	override def desiredName = "blk_mem_gen_" + num
+}
+
+class testbram(val num : Int)(implicit val conf : Configuration) extends Module{
+    val io = IO(new Bundle {})
+    val bram = Module (new blk_mem_gen(num))
+}
+
+class top extends Module{
+    val io = IO(new Bundle {})
+    implicit val configuration = Configuration()
+    val kernel1 = Module (new testbram(0))
+    val kernel2 = Module (new testbram(1))
+}
+
+case class Configuration(){
+    val Data_width = 64
+    val Addr_width = 16
+}
+```
+生成的Verilog代码:
+```
+module testbram(
+);
+  wire [15:0] bram_addra; // @[top.scala 21:23]
+  wire [63:0] bram_dina; // @[top.scala 21:23]
+  wire [63:0] bram_douta; // @[top.scala 21:23]
+  blk_mem_gen_0 bram ( // @[top.scala 21:23]
+    .addra(bram_addra),
+    .dina(bram_dina),
+    .douta(bram_douta)
+  );
+  assign bram_addra = 16'h0;
+  assign bram_dina = 64'h0;
+endmodule
+module testbram_1(
+);
+  wire [15:0] bram_addra; // @[top.scala 21:23]
+  wire [63:0] bram_dina; // @[top.scala 21:23]
+  wire [63:0] bram_douta; // @[top.scala 21:23]
+  blk_mem_gen_1 bram ( // @[top.scala 21:23]
+    .addra(bram_addra),
+    .dina(bram_dina),
+    .douta(bram_douta)
+  );
+  assign bram_addra = 16'h0;
+  assign bram_dina = 64'h0;
+endmodule
+module top(
+  input   clock,
+  input   reset
+);
+  initial begin end
+  testbram kernel1 ( // @[top.scala 27:26]
+  );
+  testbram_1 kernel2 ( // @[top.scala 28:26]
+  );
+endmodule
+```
+可以看到两个testbram模块的Verilog代码没有复用
