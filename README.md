@@ -20,6 +20,7 @@
     + [memory载入数据](#memory载入数据)
     + [使用Analog](#使用analog)
     + [模块名称参数化](#模块名称参数化)
+    + [使用Queue](#使用queue)
     
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -434,3 +435,44 @@ module top(
 endmodule
 ```
 可以看到两个testbram模块的Verilog代码没有复用
+
+### 使用Queue
+
+**接收数据使用Queue缓存**
+
+io：
+```
+val a = Flipped(Decoupled(UInt(4.W)))
+```
+
+使用Queue存储
+
+```
+val qa = Queue(io.a,32)
+qa.ready := false.B // equivalent to qa.nodeq()
+when(qa.valid){
+    qa.ready = true.B
+    data := qa.bits // or data := qa.deq()
+}
+```
+
+**发送数据使用Queue缓存**
+
+io：
+```
+val b = Flipped(Decoupled(UInt(4.W)))
+```
+
+使用Queue存储
+
+```
+val qb = Module(Queue(io.b,32))
+io.b <> qb.io.deq
+qb.io.enq.valid := false.B
+qb.io.enq.bits := DontCare
+when(qb.io.enq.ready){
+    qb.io.enq.valid "= true.B
+    qb.io.enq.bits := data 
+}
+```
+
